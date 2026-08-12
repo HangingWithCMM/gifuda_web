@@ -2,12 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        (function () {
-            document.documentElement.style.setProperty('--vh', window.innerHeight + 'px');
-        })();
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Gifuda — Desktop Pet Overlay</title>
         <meta property="og:title" content="Gifuda — Desktop Pet Overlay" />
         <meta property="og:type" content="website" />
@@ -65,7 +60,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            *:not(.pet):not(.petal), *:not(.pet):not(.petal)::before, *:not(.pet):not(.petal)::after {
+            *:not(.pet):not(.petal):not(.stick), *:not(.pet):not(.petal):not(.stick)::before, *:not(.pet):not(.petal):not(.stick)::after {
                 animation-duration: 0.001ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.001ms !important;
@@ -218,8 +213,8 @@
             position: relative;
             z-index: 1;
             min-height: 100vh;
-            min-height: var(--vh, 100vh);
             min-height: 100svh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -334,6 +329,55 @@
             flex-wrap: wrap;
             justify-content: center;
             opacity: 0;
+        }
+
+        .scroll-cue {
+            position: absolute;
+            bottom: 28px;
+            left: 0;
+            right: 0;
+            width: fit-content;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-family: var(--font-mono);
+            letter-spacing: 1px;
+            opacity: 0;
+            transform: translateZ(0);
+            will-change: transform;
+        }
+
+        .scroll-cue .scroll-label {
+            margin-right: -1px;
+        }
+
+        .scroll-cue .stick {
+            width: 18px; height: 28px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .scroll-cue .stick::before {
+            content: '';
+            position: absolute;
+            top: 5px; left: 50%;
+            transform: translateX(-50%);
+            width: 3px; height: 6px;
+            border-radius: 2px;
+            background: var(--sakura);
+            animation: scroll-dot 1.6s ease-in-out infinite;
+        }
+
+        @keyframes scroll-dot {
+            0% { top: 5px; opacity: 1; }
+            60% { top: 15px; opacity: 0.3; }
+            61% { top: 5px; opacity: 0; }
+            100% { top: 5px; opacity: 1; }
         }
 
         .btn {
@@ -1127,6 +1171,7 @@
             <a href="#stage" class="btn btn-ghost">Watch it move</a>
         </div>
 
+        <div class="scroll-cue" id="scrollCue"><div class="stick"></div><span class="scroll-label">SCROLL</span></div>
     </div>
 
     <section id="stage">
@@ -1282,20 +1327,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js" integrity="sha512-aNMyYYxdIxIaot0Y1/PLuEu3eipGCmsEUBrUq+7aVyPGMFH8z0eTP0tkqAvv34fzN6z+201d3T8HPb1svWSKHQ==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
     <script defer>
-        (function () {
-            function setVH() {
-                document.documentElement.style.setProperty('--vh', window.innerHeight + 'px');
-            }
-            let lastWidth = window.innerWidth;
-            window.addEventListener('resize', () => {
-                if (window.innerWidth !== lastWidth) {
-                    lastWidth = window.innerWidth;
-                    setVH();
-                }
-            });
-            window.addEventListener('orientationchange', setVH);
-        })();
-
         const hasAnime = typeof anime !== 'undefined';
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1362,7 +1393,7 @@
         })();
 
         window.addEventListener('DOMContentLoaded', () => {
-            const els = ['#heroEyebrow', '#heroTitle', '#heroJp', '#heroPitch', '#heroTagline', '#heroButtons']
+            const els = ['#heroEyebrow', '#heroTitle', '#heroJp', '#heroPitch', '#heroTagline', '#heroButtons', '#scrollCue']
                 .map(sel => document.querySelector(sel));
 
             safeAnime({
