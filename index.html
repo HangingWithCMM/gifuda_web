@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function () {
+            document.documentElement.style.setProperty('--vh', window.innerHeight + 'px');
+        })();
+    </script>
+    <title>Gifuda — Desktop Pet Overlay</title>
+        <meta property="og:title" content="Gifuda — Desktop Pet Overlay" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://gifuda.nya.pub/" />
+        <meta property="og:image" content="https://gifuda.nya.pub/gifuda-ui.gif" />
+        <meta property="og:description" content="A full-featured overlay for anything you want living on your desktop." />
+        <meta name="description" content="A full-featured overlay for anything you want living on your desktop.">
+    <meta name="theme-color" content="#FFB7C5">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Gifuda — Desktop Pet Overlay">
+        <meta name="twitter:description" content="The perfect desktop companion for people who name their GIFs">
+        <meta name="twitter:image" content="https://gifuda.nya.pub/gifuda-ui.gif">
+        <meta name="google-site-verification" content="tDSNXAtkuCZv7x4a87QodbISb1WZ-_I9R23X1k--RPk" />
+    <link rel="icon" type="image/png" href="gifuda_fav.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Nunito:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deepest: #0E0B16;
+            --bg-dark: #16121F;
+            --bg-panel: #1E1929;
+            --bg-elevated: #271F35;
+            --bg-input: #1A1525;
+            --border: #2D2640;
+            --border-soft: #221D30;
+            --text-primary: #F5EFF7;
+            --text-secondary: #B8B0CC;
+            --text-muted: #7A7290;
+            --sakura: #FFB7C5;
+            --sakura-deep: #E879A5;
+            --lavender: #C8B6E2;
+            --lavender-deep: #9F86C0;
+            --danger: #E85D75;
+            --good: #8FD9A8;
+            --cream: #FFF5F7;
+            --font-display: 'Zen Maru Gothic', sans-serif;
+            --font-body: 'Nunito', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            overscroll-behavior-y: none;
+        }
+
+        img, svg { max-width: 100%; height: auto; }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *:not(.pet):not(.petal):not(.stick), *:not(.pet):not(.petal):not(.stick)::before, *:not(.pet):not(.petal):not(.stick)::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-deepest);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        ::selection { background: var(--sakura-deep); color: white; }
+
+        .floating-pets {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .pet {
+            position: absolute;
+            opacity: 0.12;
+            animation: float linear infinite;
+        }
+
+        .pet img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(110vh) rotate(0deg); }
+            100% { transform: translateY(-20vh) rotate(360deg); }
+        }
+
+        .petal {
+            position: absolute;
+            width: 12px; height: 12px;
+            background: var(--sakura);
+            border-radius: 50% 0 50% 0;
+            opacity: 0.2;
+            animation: petal-fall linear infinite;
+        }
+
+        @keyframes petal-fall {
+            0% { transform: translateY(0vh) translateX(0) rotate(0deg); }
+            100% { transform: translateY(110vh) translateX(80px) rotate(720deg); }
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(14, 11, 22, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid transparent;
+            padding: 0 max(24px, calc((100% - 1000px) / 2 + 24px));
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        nav.scrolled {
+            background: rgba(14, 11, 22, 0.9);
+            border-bottom-color: var(--border-soft);
+        }
+
+        .nav-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            color: var(--sakura);
+            font-size: 18px;
+            line-height: 1;
+            z-index: 101;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: default;
+        }
+
+        .nav-brand img {
+            width: 40px; height: 40px;
+            border-radius: 6px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-brand:hover img {
+            transform: rotate(-12deg) scale(1.1);
+        }
+
+        .nav-brand .name {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--sakura);
+        }
+
+        .nav-brand .jp {
+            font-size: 16px;
+            color: var(--lavender);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            position: relative;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding-bottom: 3px;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 100%;
+            bottom: 0;
+            height: 1.5px;
+            background: var(--sakura);
+            transition: right 0.25s ease;
+        }
+
+        .nav-links a:hover { color: var(--sakura); }
+        .nav-links a:hover::after { right: 0; }
+
+        .hero {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            min-height: var(--vh, 100vh);
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+
+        .hero-eyebrow {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            line-height: 1;
+            gap: 9px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(232, 121, 165, 0.1);
+            border: 1px solid rgba(232, 121, 165, 0.32);
+            color: var(--sakura);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            margin-bottom: 22px;
+            opacity: 0;
+        }
+
+        .hero-eyebrow .dot {
+            flex-shrink: 0;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--sakura);
+            box-shadow: 0 0 8px var(--sakura);
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+
+        .hero-watermark {
+            position: absolute;
+            top: 46%;
+            left: 50%;
+            transform: translate(-50%, -35%) rotate(-6deg);
+            pointer-events: none;
+            z-index: 0;
+            animation: watermark-drift 20s ease-in-out infinite;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .watermark-main {
+            display: block;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: min(46vw, 460px);
+            color: rgba(200, 182, 226, 0.05);
+            white-space: nowrap;
+        }
+
+        .watermark-translation {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: min(2.4vw, 22px);
+            letter-spacing: 1px;
+            color: rgba(200, 182, 226, 0.3);
+            margin: 0 0 -9.35em 17.6em;
+        }
+
+        @keyframes watermark-drift {
+            0%, 100% { transform: translate(-50%, -50%) rotate(-6deg) scale(1); }
+            50% { transform: translate(-50%, -50%) rotate(-4deg) scale(1.04); }
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 800;
+            color: var(--sakura);
+            margin-bottom: 8px;
+            letter-spacing: -2px;
+            opacity: 0;
+        }
+
+        .hero .subtitle-jp {
+            font-family: var(--font-display);
+            font-size: clamp(24px, 4vw, 36px);
+            color: var(--lavender);
+            margin-bottom: 16px;
+            font-weight: 400;
+            opacity: 0;
+        }
+
+        .hero-pitch { opacity: 0; }
+
+        .hero .tagline {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin-bottom: 36px;
+            opacity: 0;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .scroll-cue {
+            position: absolute;
+            bottom: 28px;
+            left: 0;
+            right: 0;
+            width: fit-content;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-family: var(--font-mono);
+            letter-spacing: 1px;
+            opacity: 0;
+            transform: translateZ(0);
+            will-change: transform;
+        }
+
+        .scroll-cue .scroll-label {
+            margin-right: -1px;
+        }
+
+        .scroll-cue .stick {
+            width: 18px; height: 28px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .scroll-cue .stick::before {
+            content: '';
+            position: absolute;
+            top: 5px; left: 50%;
+            transform: translateX(-50%);
+            width: 3px; height: 6px;
+            border-radius: 2px;
+            background: var(--sakura);
+            animation: scroll-dot 1.6s ease-in-out infinite;
+        }
+
+        @keyframes scroll-dot {
+            0% { top: 5px; opacity: 1; }
+            60% { top: 15px; opacity: 0.3; }
+            61% { top: 5px; opacity: 0; }
+            100% { top: 5px; opacity: 1; }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: var(--font-body);
+            text-decoration: none;
+            transition: transform 0.15s ease, box-shadow 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+            cursor: pointer;
+            border: none;
+            will-change: transform;
+        }
+
+        .btn-primary {
+            background: var(--sakura-deep);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--sakura);
+            box-shadow: 0 8px 24px rgba(232, 121, 165, 0.35);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border-color: var(--lavender-deep);
+        }
+
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 80px 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .eyebrow {
+            display: block;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--lavender-deep);
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            font-size: 15px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 48px;
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .reveal { opacity: 0; transform: translateY(28px); }
+        .reveal.in-view { animation: none; }
+
+        .stage-wrap {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: 18px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+        }
+
+        .stage-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border-soft);
+            background: var(--bg-dark);
+        }
+
+        .stage-bar .rec {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .rec-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--danger);
+            animation: rec-blink 1.4s ease-in-out infinite;
+        }
+
+        @keyframes rec-blink {
+            0%, 100% { opacity: 1; } 50% { opacity: 0.25; }
+        }
+
+        .stage-bar .hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .stage {
+            position: relative;
+            height: 440px;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255,183,197,0.06), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(159,134,192,0.08), transparent 40%),
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 28px),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 28px);
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .demo-pet {
+            position: absolute;
+            width: 185px; height: 185px;
+            left: 0; top: 0;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            z-index: 3;
+        }
+
+        .demo-pet.dragging {
+            cursor: grabbing;
+        }
+
+        .demo-pet:focus-visible {
+            outline: 2px solid var(--sakura);
+            outline-offset: 4px;
+            border-radius: 50%;
+        }
+
+        .pet-inner, .pet-squish {
+            width: 100%;
+            height: 100%;
+        }
+        .pet-squish {
+            filter: drop-shadow(0 6px 14px rgba(0,0,0,0.4));
+            will-change: transform;
+        }
+        .pet-inner { will-change: transform; }
+
+        .demo-pet img { width: 100%; height: 100%; display: block; pointer-events: none; }
+
+        .pet-bubble {
+            position: absolute;
+            bottom: 108%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.6);
+            background: var(--cream);
+            color: var(--bg-deepest);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 6px 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+        }
+        .pet-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%; left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--cream);
+        }
+
+        .zzz {
+            position: absolute;
+            bottom: 95%;
+            right: -6px;
+            font-family: var(--font-display);
+            font-size: 13px;
+            color: var(--lavender);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .heart-particle {
+            position: absolute;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .stage-empty-hint {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .stage-caption {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 18px;
+            border-top: 1px solid var(--border-soft);
+            background: var(--bg-dark);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .stage-caption .pat-count {
+            font-family: var(--font-mono);
+            color: var(--sakura);
+        }
+
+        .mockup-container {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .mockup-window {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            width: 420px;
+            position: relative;
+        }
+
+        .mockup-titlebar {
+            background: var(--bg-panel);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        .mockup-titlebar img {
+            width: 24px; height: 24px;
+            border-radius: 4px;
+        }
+
+        .mockup-titlebar .title {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .mockup-body {
+            display: flex;
+            min-height: 360px;
+        }
+
+        .mockup-sidebar {
+            width: 160px;
+            background: var(--bg-panel);
+            padding: 12px 8px;
+            border-right: 1px solid var(--border-soft);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mockup-sidebar .add-btn {
+            background: var(--sakura-deep);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .mockup-sidebar .pet-label {
+            font-size: 9px;
+            color: var(--lavender);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            padding: 0 6px;
+        }
+
+        .mockup-sidebar .pet-item {
+            padding: 7px 10px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border-radius: 5px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        .mockup-sidebar .pet-item.active {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border-left: 3px solid var(--sakura);
+            padding-left: 7px;
+        }
+
+        .mockup-sidebar .pet-item .x {
+            color: var(--danger);
+            font-size: 10px;
+            font-weight: 700;
+            border: 1px solid var(--danger);
+            border-radius: 3px;
+            padding: 0 4px;
+            line-height: 1.4;
+        }
+
+        .mockup-sidebar .credit {
+            font-size: 8px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: auto;
+            padding: 8px 0;
+        }
+
+        .mockup-content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .mockup-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .mockup-card .card-label {
+            font-size: 9px;
+            color: var(--lavender);
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+        }
+
+        .mockup-btn-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .mockup-btn {
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 600;
+            transition: box-shadow 0.3s, transform 0.15s;
+        }
+
+        .mockup-btn.primary { background: var(--sakura-deep); color: white; }
+        .mockup-btn.accent { background: var(--lavender-deep); color: white; }
+        .mockup-btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+        .mockup-btn.pulse { box-shadow: 0 0 0 4px rgba(255,183,197,0.18); transform: translateY(-1px); }
+
+        .mockup-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .mockup-slider-label {
+            background: var(--bg-elevated);
+            border-radius: 10px;
+            padding: 2px 10px;
+            font-size: 10px;
+            color: var(--text-primary);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .mockup-slider {
+            flex: 1;
+            height: 4px;
+            background: var(--bg-input);
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .mockup-slider .fill {
+            position: absolute;
+            left: 0; top: 0; height: 100%;
+            background: var(--sakura-deep);
+            border-radius: 2px;
+        }
+
+        .mockup-slider .handle {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: var(--cream);
+            border: 2px solid var(--sakura-deep);
+        }
+
+        .mockup-spin {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            width: 40px;
+            height: 20px;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mockup-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+            font-size: 10px;
+            color: var(--text-primary);
+        }
+
+        .mockup-checkbox .box {
+            width: 14px; height: 14px;
+            border-radius: 4px;
+            border: 1.5px solid var(--border);
+            background: var(--bg-input);
+        }
+
+        .mockup-checkbox .box.checked {
+            background: var(--sakura-deep);
+            border-color: var(--sakura-deep);
+        }
+
+        .mockup-arrange { width: 220px; }
+
+        .mockup-arrange .mockup-body {
+            flex-direction: column;
+            min-height: auto;
+            padding: 16px;
+        }
+
+        .snap-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 36px);
+            gap: 4px;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+
+        .snap-grid .snap-btn {
+            width: 36px; height: 36px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: background 0.25s, color 0.25s, transform 0.15s;
+        }
+        .snap-grid .snap-btn.hit { background: var(--sakura-deep); color: white; transform: scale(0.92); }
+
+        .nudge-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 36px);
+            gap: 4px;
+            justify-content: center;
+            margin: 0 auto 8px;
+        }
+
+        .nudge-grid .nudge-btn {
+            width: 36px; height: 26px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--sakura);
+        }
+
+        .nudge-grid .empty { visibility: hidden; }
+
+        .mockup-arrange .divider {
+            height: 1px;
+            background: var(--border-soft);
+            margin: 10px 0;
+        }
+
+        .mockup-arrange .section-lbl {
+            font-size: 9px;
+            color: var(--lavender);
+            letter-spacing: 1.5px;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .rotation-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rotation-row .mockup-slider { flex: 1; }
+
+        .rotation-val {
+            font-size: 10px;
+            color: var(--sakura);
+            font-weight: 600;
+            width: 30px;
+            text-align: center;
+            font-family: var(--font-mono);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+            gap: 16px;
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        .contact-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.25s ease, border-color 0.25s ease;
+            word-break: break-word;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .contact-card:hover {
+            border-color: var(--lavender-deep);
+            transform: translateY(-4px);
+        }
+
+        .contact-card .platform {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .contact-card .handle {
+            font-size: 15px;
+            color: var(--sakura);
+            font-weight: 600;
+        }
+
+        .download-box {
+            text-align: center;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: 18px;
+            padding: 48px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-box .peek {
+            position: absolute;
+            width: 64px; height: 64px;
+            bottom: -8px;
+            right: 24px;
+            opacity: 0;
+        }
+        .download-box .peek img { width: 100%; }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px 24px;
+            border-top: 1px solid var(--border-soft);
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer .wink { display: block; margin-top: 4px; }
+
+        .gradient-text {
+            background: linear-gradient(120deg, var(--sakura) 0%, var(--lavender) 45%, var(--sakura-deep) 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: gradient-drift 6s ease-in-out infinite;
+        }
+        @keyframes gradient-drift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+            will-change: transform, opacity;
+        }
+
+        .hero-orb.orb-1 {
+            width: 420px; height: 420px;
+            background: rgba(255, 183, 197, 0.16);
+            top: -120px; left: -120px;
+            animation: orb-drift 14s ease-in-out infinite;
+        }
+        .hero-orb.orb-2 {
+            width: 360px; height: 360px;
+            background: rgba(159, 134, 192, 0.18);
+            top: 35%; right: -100px;
+            animation: orb-drift-reverse 17s ease-in-out infinite;
+        }
+        .hero-orb.orb-3 {
+            width: 320px; height: 320px;
+            background: rgba(232, 121, 165, 0.13);
+            bottom: -80px; left: 28%;
+            animation: orb-pulse 11s ease-in-out infinite;
+        }
+        @media (max-width: 768px) {
+            .hero-orb.orb-1 { left: -60px; top: -60px; width: 280px; height: 280px; }
+            .hero-orb.orb-2 { right: -60px; width: 260px; height: 260px; }
+            .hero-orb.orb-3 { left: 20%; bottom: -40px; width: 240px; height: 240px; }
+        }
+        @keyframes orb-drift {
+            0%, 100% { transform: translate(0, 0); opacity: 0.85; }
+            50% { transform: translate(50px, 40px); opacity: 1; }
+        }
+        @keyframes orb-drift-reverse {
+            0%, 100% { transform: translate(0, 0); opacity: 0.8; }
+            50% { transform: translate(-40px, -50px); opacity: 1; }
+        }
+        @keyframes orb-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.15); opacity: 0.95; }
+        }
+
+        .hero-pitch {
+            position: relative;
+            z-index: 2;
+            font-family: var(--font-display);
+            font-size: clamp(24px, 4.6vw, 42px);
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.22;
+            letter-spacing: -0.5px;
+            max-width: 720px;
+            margin: 4px auto 14px;
+        }
+        .hero-eyebrow, .hero h1, .hero .subtitle-jp, .hero .tagline, .hero-buttons {
+            position: relative;
+            z-index: 2;
+        }
+
+        .wink {
+            color: var(--lavender);
+            font-style: italic;
+        }
+
+        @media (min-width: 1024px) {
+            html { scrollbar-gutter: stable; }
+        }
+
+        @media (max-width: 768px) {
+            section { padding: 56px 20px; }
+            .hero { padding: 80px 20px 40px; }
+
+            .nav-toggle { display: block; }
+            .nav-links {
+                position: fixed;
+                top: 60px; left: 0; right: 0;
+                background: rgba(14, 11, 22, 0.98);
+                backdrop-filter: blur(12px);
+                flex-direction: column;
+                gap: 0;
+                padding: 8px 0;
+                border-bottom: 1px solid var(--border-soft);
+                display: none;
+                list-style: none;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links li { width: 100%; }
+            .nav-links a {
+                display: block;
+                padding: 14px 24px;
+                font-size: 15px;
+            }
+
+            .mockup-window:not(.mockup-arrange) { width: 100%; max-width: 100%; }
+            .mockup-arrange { width: 220px; max-width: 220px; }
+            .mockup-sidebar { width: 140px; }
+            .stage { height: 340px; }
+        }
+
+        @media (max-width: 480px) {
+            section { padding: 40px 16px; }
+            .hero { padding: 70px 16px 32px; }
+            .hero-watermark .watermark-main { font-size: min(70vw, 320px); }
+            .hero-eyebrow { font-size: 10px; padding: 6px 12px; }
+            .hero-buttons { flex-direction: column; width: 100%; }
+            .hero-buttons .btn { width: 100%; justify-content: center; }
+            .mockup-sidebar { width: 120px; }
+            .section-title { font-size: 26px; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deepest); }
+        ::-webkit-scrollbar-thumb { background: var(--lavender-deep); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--sakura-deep); }
+    </style>
+</head>
+<body>
+
+    <div class="floating-pets" id="floatingPets"></div>
+
+    <nav id="siteNav">
+        <div class="nav-brand">
+            <img src="gifuda_fav.png" alt="Gifuda">
+            <span class="name">Gifuda</span>
+            <span class="jp">ギフダ</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#stage">Live Demo</a></li>
+            <li><a href="#preview">Preview</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#download" style="color: var(--sakura);">Download</a></li>
+        </ul>
+        <button class="nav-toggle" aria-label="Toggle menu">☰</button>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-orb orb-1" aria-hidden="true"></div>
+        <div class="hero-orb orb-2" aria-hidden="true"></div>
+        <div class="hero-orb orb-3" aria-hidden="true"></div>
+
+        <span class="hero-watermark" aria-hidden="true">
+            <span class="watermark-translation">Kirika</span>
+            <span class="watermark-main">キリカ</span>
+        </span>
+
+        <span class="hero-eyebrow" id="heroEyebrow"><span class="dot"></span>Turn any GIF into a living desktop pet</span>
+        <h1 id="heroTitle">Gifuda</h1>
+        <div class="subtitle-jp" id="heroJp">ギフダ</div>
+        <h2 class="hero-pitch" id="heroPitch">The perfect desktop companion for <span class="gradient-text">people who name their GIFs</span></h2>
+        <p class="tagline" id="heroTagline">Drag &amp; drop GIFs, images, or videos onto your desktop. Gifuda turns them into something that wanders, notices your cursor, and occasionally falls asleep on the job.</p>
+        <div class="hero-buttons" id="heroButtons">
+            <a href="#download" class="btn btn-primary">Download Gifuda</a>
+            <a href="#stage" class="btn btn-ghost">Watch it move</a>
+        </div>
+
+        <div class="scroll-cue" id="scrollCue"><div class="stick"></div><span class="scroll-label">SCROLL</span></div>
+    </div>
+
+    <section id="stage">
+        <span class="eyebrow reveal">Meet Kirika <span style="font-weight: bold;">キリカ</span></span>
+        <h2 class="section-title reveal">This is what it actually does</h2>
+        <p class="section-subtitle reveal">A tiny, sandboxed version of the real behavior. <span class="wink">Try poking it.</span></p>
+
+        <div class="stage-wrap reveal">
+            <div class="stage-bar">
+                <div class="rec"><span class="rec-dot"></span>LIVE</div>
+                <div class="hint" id="stageHint">move your cursor nearby, or click to pat</div>
+            </div>
+            <div class="stage" id="demoStage">
+                <div class="demo-pet" id="demoPet" role="button" tabindex="0" aria-label="Pat the desktop pet">
+                    <div class="pet-bubble" id="petBubble"></div>
+                    <div class="zzz" id="petZzz">z z z</div>
+                    <div class="pet-inner" id="petInner">
+                        <div class="pet-squish" id="petSquish">
+                            <img src="gifuda_icon.png" alt="A wandering desktop pet, demonstrating Gifuda's live behavior">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="stage-caption">
+                <span>Real app also supports chroma key, hue/scale/opacity sliders, and rotation. This box does not.</span>
+                <span class="pat-count" id="patCount">0 pats</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="preview">
+        <span class="eyebrow reveal">what you'll actually click</span>
+        <h2 class="section-title reveal">Preview</h2>
+        <p class="section-subtitle reveal">A clean dashboard with a sidebar for your pets, and a compact arrange window <span class="wink">for when they need discipline.</span></p>
+        <div class="mockup-container">
+
+            <div class="mockup-window reveal">
+                <div class="mockup-titlebar">
+                    <img src="gifuda_fav.png" alt="">
+                    <span class="title">Gifuda — cat.gif</span>
+                </div>
+                <div class="mockup-body">
+                    <div class="mockup-sidebar">
+                        <div class="add-btn">+ Add Pet</div>
+                        <div class="pet-label">PETS</div>
+                        <div class="pet-item active" id="petItemCat">cat.gif <span class="x">X</span></div>
+                        <div class="pet-item" id="petItemDog">dog.png <span class="x">X</span></div>
+                        <div class="pet-item" id="petItemAnime">anime.mp4 <span class="x">X</span></div>
+                        <div class="credit">Made by C.M.M.</div>
+                    </div>
+                    <div class="mockup-content">
+                        <div class="mockup-card">
+                            <div class="card-label">ACTIONS</div>
+                            <div class="mockup-btn-row">
+                                <div class="mockup-btn primary" id="btnPause">Pause</div>
+                                <div class="mockup-btn accent" id="btnArrange">Arrange</div>
+                                <div class="mockup-btn ghost" id="btnHide">Hide</div>
+                            </div>
+                        </div>
+                        <div class="mockup-card">
+                            <div class="card-label">APPEARANCE</div>
+                            <div class="mockup-slider-row">
+                                <div class="mockup-slider-label">Scale</div>
+                                <div class="mockup-slider" id="sliderScale"><div class="fill" style="width: 35%;"></div><div class="handle" style="left: 35%;"></div></div>
+                                <div class="mockup-spin" id="spinScale">1.0x</div>
+                            </div>
+                            <div class="mockup-slider-row">
+                                <div class="mockup-slider-label">Opacity</div>
+                                <div class="mockup-slider" id="sliderOpacity"><div class="fill" style="width: 90%;"></div><div class="handle" style="left: 90%;"></div></div>
+                                <div class="mockup-spin" id="spinOpacity">90%</div>
+                            </div>
+                            <div class="mockup-slider-row">
+                                <div class="mockup-slider-label">FPS Delay</div>
+                                <div class="mockup-slider" id="sliderFps"><div class="fill" style="width: 20%;"></div><div class="handle" style="left: 20%;"></div></div>
+                                <div class="mockup-spin" id="spinFps">2</div>
+                            </div>
+                        </div>
+                        <div class="mockup-card">
+                            <div class="card-label">TRANSFORM</div>
+                            <div class="mockup-checkbox"><div class="box checked"></div> High Quality Resize</div>
+                            <div class="mockup-checkbox"><div class="box"></div> Flip Horizontal</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mockup-window mockup-arrange reveal">
+                <div class="mockup-titlebar">
+                    <img src="gifuda_fav.png" alt="">
+                    <span class="title">Arrange — cat.gif</span>
+                </div>
+                <div class="mockup-body">
+                    <div class="section-lbl">ARRANGE</div>
+                    <div class="snap-grid" id="snapGrid">
+                        <div class="snap-btn">↖</div><div class="snap-btn">↑</div><div class="snap-btn">↗</div>
+                        <div class="snap-btn">←</div><div class="snap-btn">•</div><div class="snap-btn">→</div>
+                        <div class="snap-btn">↙</div><div class="snap-btn">↓</div><div class="snap-btn">↘</div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="section-lbl">NUDGE</div>
+                    <div class="nudge-grid">
+                        <div class="empty"></div><div class="nudge-btn">↑</div><div class="empty"></div>
+                        <div class="nudge-btn">←</div><div class="empty"></div><div class="nudge-btn">→</div>
+                        <div class="empty"></div><div class="nudge-btn">↓</div><div class="empty"></div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="section-lbl">ROTATION</div>
+                    <div class="rotation-row">
+                        <div class="mockup-slider" id="sliderRotation"><div class="fill" style="width: 25%;"></div><div class="handle" style="left: 25%;"></div></div>
+                        <div class="rotation-val" id="rotationVal">90°</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="download">
+        <span class="eyebrow reveal">the actual point of this page</span>
+        <h2 class="section-title reveal">Get Gifuda</h2>
+        <p class="section-subtitle reveal">Download, run, and put something ridiculous on your desktop.</p>
+        <div class="download-box reveal">
+            <img src="gifuda_icon.png" class="peek" id="downloadPeek" alt="">
+            <a href="#" class="btn btn-primary" style="font-size: 16px; padding: 16px 40px;" onclick="alert('Currently in beta. Contact me for access'); return false;">Download Gifuda</a>
+            <p style="margin-top: 16px; color: var(--text-muted); font-size: 13px;">Requires Windows 10 or later<span class="wink" style="display:block; margin-top: 4px;">and a willingness to explain your desktop to people.</span></p>
+        </div>
+    </section>
+
+    <section id="contact">
+        <span class="eyebrow reveal">say hi</span>
+        <h2 class="section-title reveal">Get in touch</h2>
+        <p class="section-subtitle reveal">Questions, feedback, or just want to share your pets? <span class="wink">Reach out.</span></p>
+        <div class="contact-grid">
+            <a href="#" class="contact-card reveal" onclick="return false;">
+                <div class="platform">Discord</div>
+                <div class="handle">c.m.m.</div>
+            </a>
+            <a href="https://reddit.com/u/HangWithCmm" class="contact-card reveal" target="_blank">
+                <div class="platform">Reddit</div>
+                <div class="handle">u/HangWithCmm</div>
+            </a>
+            <a href="mailto:cmmonlineservices@gmail.com" class="contact-card reveal">
+                <div class="platform">Email</div>
+                <div class="handle">cmmonlineservices@gmail.com</div>
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; Gifuda — C.M.M.</p>
+        <span class="wink">Made with mild regret and a lot of sakura.</span>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js" integrity="sha512-aNMyYYxdIxIaot0Y1/PLuEu3eipGCmsEUBrUq+7aVyPGMFH8z0eTP0tkqAvv34fzN6z+201d3T8HPb1svWSKHQ==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+    <script defer>
+        (function () {
+            function setVH() {
+                document.documentElement.style.setProperty('--vh', window.innerHeight + 'px');
+            }
+            let lastWidth = window.innerWidth;
+            window.addEventListener('resize', () => {
+                if (window.innerWidth !== lastWidth) {
+                    lastWidth = window.innerWidth;
+                    setVH();
+                }
+            });
+            window.addEventListener('orientationchange', setVH);
+        })();
+
+        const hasAnime = typeof anime !== 'undefined';
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function safeAnime(opts) {
+            if (hasAnime) return anime(opts);
+            if (opts.targets) {
+                const els = (opts.targets instanceof NodeList || Array.isArray(opts.targets)) ? opts.targets : [opts.targets];
+                els.forEach(el => { if (el) el.style.opacity = 1; });
+            }
+            if (opts.complete) opts.complete();
+        }
+
+        (function () {
+            const container = document.getElementById('floatingPets');
+            const iconSrc = 'gifuda_icon.png';
+
+            for (let i = 0; i < 8; i++) {
+                const pet = document.createElement('div');
+                pet.className = 'pet';
+                const size = 40 + Math.random() * 60;
+                pet.style.width = size + 'px';
+                pet.style.height = size + 'px';
+                pet.style.left = Math.random() * 100 + '%';
+                const duration = 15 + Math.random() * 15;
+                pet.style.animationDuration = duration + 's';
+                pet.style.animationDelay = (-Math.random() * duration) + 's';
+
+                const img = document.createElement('img');
+                img.src = iconSrc;
+                img.alt = '';
+                pet.appendChild(img);
+                container.appendChild(pet);
+            }
+
+            for (let i = 0; i < 25; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.style.left = Math.random() * 100 + '%';
+                const duration = 8 + Math.random() * 12;
+                petal.style.animationDuration = duration + 's';
+                petal.style.animationDelay = (-Math.random() * duration) + 's';
+                const size = 8 + Math.random() * 8;
+                petal.style.width = size + 'px';
+                petal.style.height = size + 'px';
+                container.appendChild(petal);
+            }
+        })();
+
+        (function () {
+            const nav = document.getElementById('siteNav');
+            window.addEventListener('scroll', () => {
+                nav.classList.toggle('scrolled', window.scrollY > 20);
+            }, { passive: true });
+
+            const toggle = document.querySelector('.nav-toggle');
+            const links = document.querySelector('.nav-links');
+            if (toggle && links) {
+                toggle.addEventListener('click', () => links.classList.toggle('open'));
+                links.querySelectorAll('a').forEach(a => {
+                    a.addEventListener('click', () => links.classList.remove('open'));
+                });
+            }
+
+        })();
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const els = ['#heroEyebrow', '#heroTitle', '#heroJp', '#heroPitch', '#heroTagline', '#heroButtons', '#scrollCue']
+                .map(sel => document.querySelector(sel));
+
+            safeAnime({
+                targets: els,
+                opacity: [0, 1],
+                translateY: [18, 0],
+                easing: 'easeOutQuad',
+                duration: 700,
+                delay: hasAnime ? anime.stagger(110, { start: 150 }) : 0
+            });
+        });
+
+        (function () {
+            const items = document.querySelectorAll('.reveal');
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        safeAnime({
+                            targets: entry.target,
+                            opacity: [0, 1],
+                            translateY: [24, 0],
+                            duration: 650,
+                            easing: 'easeOutCubic'
+                        });
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+            items.forEach(el => io.observe(el));
+        })();
+
+        (function () {
+            if (reducedMotion) return;
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const r = btn.getBoundingClientRect();
+                    const relX = (e.clientX - r.left - r.width / 2) * 0.18;
+                    const relY = (e.clientY - r.top - r.height / 2) * 0.35;
+                    btn.style.transform = `translate(${relX}px, ${relY}px)`;
+                });
+                btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+            });
+        })();
+
+        (function () {
+            const stage = document.getElementById('demoStage');
+            const pet = document.getElementById('demoPet');
+            const petInner = document.getElementById('petInner');
+            const petSquish = document.getElementById('petSquish');
+            const bubble = document.getElementById('petBubble');
+            const zzz = document.getElementById('petZzz');
+            const patCountEl = document.getElementById('patCount');
+            const stageHint = document.getElementById('stageHint');
+            if (!stage || !pet || !petInner || !petSquish) return;
+
+            const PAT_LINES = [ 'hehe~', 'that feels nice', 'aww', 'mrrp, thank you', ':3', 'again? okay!', "you're sweet",];
+            const NOTICE_LINES = [ 'oh, hi!', 'hi there', 'watcha doing?', 'you noticed me?', 'hehe, hi', '...watching you', ];
+            const PET_SIZE = 190;
+
+            let lastLineShown = null;
+            function pickLine(lines) {
+                if (lines.length === 1) return lines[0];
+                let line;
+                do {
+                    line = lines[Math.floor(Math.random() * lines.length)];
+                } while (line === lastLineShown);
+                lastLineShown = line;
+                return line;
+            }
+
+            function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+            function lerp(a, b, t) { return a + (b - a) * t; }
+
+            const pers = { activity: 0.55, laziness: 0.4, reactivity: 1.0, wanderPref: 1.3 };
+            const wanderAmount = 0.85;
+            const cursorAmount = 0.7;
+            const bobAmount = 0.6;
+            const bobF1 = 0.83, bobF2 = 1.37, bobF3 = 2.11;
+            const bobPhase1 = Math.random() * Math.PI * 2;
+            const bobPhase2 = Math.random() * Math.PI * 2;
+            const bobPhase3 = Math.random() * Math.PI * 2;
+            let elapsed = 0;
+
+            let basePos = { x: 0, y: 0 };      
+            let wanderState = 'resting';
+            let wanderRestTimer = 1.0;
+            let wanderTarget = null, wanderStart = null, wanderProgress = 0, wanderDuration = 1;
+            let idleRests = 0;
+
+            let attention = 0;
+            let isLookingAtCursor = false;
+            let noticeCooldown = 0;
+            let lastCursorPos = null;
+            let tiltAngle = 0, tiltTarget = 0;     
+            let lookY = 0, lookYTarget = 0;        
+            let hoverGrow = 1, hoverGrowVel = 0;
+            let cursorOverPet = false;
+
+            let facing = 1;          
+            let facingDisplay = 1;   
+            let sleeping = false, patting = false, pats = 0;
+            let sleepFade = 0, sleepTarget = 0, sleepRockPhase = 0;
+            let mouseInWindow = null; 
+            let lastTime = null;
+            let isDragging = false, dragMoved = false, dragOffset = { x: 0, y: 0 };
+
+            window.addEventListener('mousemove', (e) => { mouseInWindow = { x: e.clientX, y: e.clientY }; }, { passive: true });
+            window.addEventListener('mouseleave', () => { mouseInWindow = null; });
+
+            function stageRect() { return stage.getBoundingClientRect(); }
+
+            function clampToStage(x, y) {
+                const r = stageRect();
+                return {
+                    x: Math.max(0, Math.min(r.width - PET_SIZE, x)),
+                    y: Math.max(0, Math.min(r.height - PET_SIZE, y))
+                };
+            }
+
+            function petCenterViewport() {
+                const r = stageRect();
+                return { x: r.left + basePos.x + PET_SIZE / 2, y: r.top + basePos.y + PET_SIZE / 2 };
+            }
+
+            function maybeFlip(desired, chance) {
+                return;
+            }
+
+            let introLocked = false;
+
+            function showBubble(text, duration, force) {
+                if (introLocked && !force) return;
+                bubble.textContent = text;
+                safeAnime({
+                    targets: bubble,
+                    opacity: [0, 1],
+                    scale: [0.6, 1],
+                    translateY: [4, 0],
+                    translateX: '-50%',
+                    duration: 220,
+                    easing: 'easeOutBack'
+                });
+                clearTimeout(bubble._t);
+                bubble._t = setTimeout(() => {
+                    safeAnime({ targets: bubble, opacity: [1, 0], scale: [1, 0.6], translateX: '-50%', duration: 200, easing: 'easeInQuad' });
+                }, duration || 1400);
+            }
+
+            const introIO = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const introLine = 'hi! I\'m Kirika キリカ :3';
+                        const introDuration = 3200;
+                        lastLineShown = introLine;
+                        introLocked = true;
+                        showBubble(introLine, introDuration, true);
+                        setTimeout(() => { introLocked = false; }, introDuration);
+                        introIO.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.6 });
+            introIO.observe(stage);
+
+            function spawnHearts() {
+                const r = pet.getBoundingClientRect();
+                const stageR = stage.getBoundingClientRect();
+                for (let i = 0; i < 4; i++) {
+                    const h = document.createElement('div');
+                    h.className = 'heart-particle';
+                    h.textContent = '♥';
+                    h.style.color = i % 2 === 0 ? 'var(--sakura)' : 'var(--lavender)';
+                    const startX = (r.left - stageR.left) + r.width / 2 + (Math.random() * 20 - 10);
+                    const startY = (r.top - stageR.top) + 6;
+                    h.style.left = startX + 'px';
+                    h.style.top = startY + 'px';
+                    stage.appendChild(h);
+                    safeAnime({
+                        targets: h,
+                        translateY: -46 - Math.random() * 20,
+                        translateX: (Math.random() * 40 - 20),
+                        opacity: [1, 0],
+                        scale: [0.6, 1],
+                        duration: 900 + Math.random() * 400,
+                        easing: 'easeOutQuad',
+                        complete: () => h.remove()
+                    });
+                }
+            }
+
+            function tickWander(dt) {
+                if (sleeping || patting || isDragging || introLocked) return;
+                const r = stageRect();
+
+                if (wanderState === 'resting') {
+                    wanderRestTimer -= dt;
+                    if (wanderRestTimer <= 0) {
+                        if (Math.random() < pers.activity * (0.3 + wanderAmount * 0.7)) {
+                            
+                            const radius = (100 + wanderAmount * 180) * pers.wanderPref;
+                            let tx = basePos.x, ty = basePos.y;
+                            for (let i = 0; i < 20; i++) {
+                                const angle = Math.random() * Math.PI * 2;
+                                const dist = radius * 0.3 + Math.random() * (radius * 0.7);
+                                tx = basePos.x + Math.cos(angle) * dist;
+                                ty = basePos.y + Math.sin(angle) * dist;
+                                tx = Math.max(0, Math.min(r.width - PET_SIZE, tx));
+                                ty = Math.max(0, Math.min(r.height - PET_SIZE, ty));
+                                if (Math.hypot(tx - basePos.x, ty - basePos.y) > 14) break;
+                            }
+                            wanderTarget = { x: tx, y: ty };
+                            wanderStart = { x: basePos.x, y: basePos.y };
+                            const dist = Math.hypot(tx - basePos.x, ty - basePos.y);
+                            const speed = 34 + wanderAmount * 46; 
+                            wanderDuration = Math.max(0.8, dist / speed);
+                            wanderProgress = 0;
+                            wanderState = 'moving';
+                            
+                            maybeFlip(wanderTarget.x >= basePos.x ? 1 : -1, 0.6);
+                        } else {
+                            wanderRestTimer = 0.5 + Math.random() * 1.0; 
+                        }
+                    }
+                } else if (wanderState === 'moving') {
+                    wanderProgress += dt / wanderDuration;
+                    if (wanderProgress >= 1) {
+                        basePos = { x: wanderTarget.x, y: wanderTarget.y };
+                        wanderState = 'resting';
+                        idleRests++;
+                        wanderRestTimer = (2.5 + Math.random() * 4.5) * (0.5 + pers.laziness * 1.5) * (1.5 - wanderAmount);
+                        if (idleRests > 6 && Math.random() < 0.2) goToSleep();
+                    } else {
+                        const t = easeInOutCubic(Math.min(1, wanderProgress));
+                        basePos = { x: lerp(wanderStart.x, wanderTarget.x, t), y: lerp(wanderStart.y, wanderTarget.y, t) };
+                    }
+                }
+            }
+
+            function tickCursor(dt) {
+                if (sleeping || !mouseInWindow) {
+                    attention = Math.max(0, attention - dt * 0.5);
+                    tiltTarget = 0; lookYTarget = 0; cursorOverPet = false;
+                } else {
+                    const c = petCenterViewport();
+                    const dx = mouseInWindow.x - c.x;
+                    const dy = mouseInWindow.y - c.y;
+                    const dist = Math.hypot(dx, dy);
+
+                    let cursorMoved = false;
+                    if (lastCursorPos) {
+                        cursorMoved = Math.hypot(mouseInWindow.x - lastCursorPos.x, mouseInWindow.y - lastCursorPos.y) > 3;
+                    }
+                    lastCursorPos = mouseInWindow;
+
+                    const noticeRadius = 90 + cursorAmount * 70;
+                    if (dist < noticeRadius) {
+                        if (cursorMoved && noticeCooldown <= 0) {
+                            if (!isLookingAtCursor) {
+                                safeAnime({ targets: petSquish, scale: [1, 1.1, 1], duration: 360, easing: 'easeOutQuad' });
+                                if (Math.random() < 0.5) showBubble(pickLine(NOTICE_LINES), 1100);
+                                
+                                maybeFlip(dx >= 0 ? 1 : -1, 0.7);
+                            }
+                            isLookingAtCursor = true;
+                            attention = 1.0;
+                            noticeCooldown = 0.5;
+                        } else if (isLookingAtCursor) {
+                            attention -= dt * 0.12; 
+                            if (attention <= 0) { attention = 0; isLookingAtCursor = false; }
+                        } else {
+                            attention = Math.min(1, attention + dt * 0.3);
+                        }
+                    } else {
+                        attention -= dt * 0.5;
+                        if (attention <= 0) { attention = 0; isLookingAtCursor = false; }
+                    }
+                    noticeCooldown -= dt;
+
+                    if (attention > 0.01 && dist > 5) {
+                        const horizRatio = Math.max(-1, Math.min(1, dx / (PET_SIZE / 2)));
+                        tiltTarget = horizRatio * (12 * cursorAmount * pers.reactivity) * attention;
+                        const vertRatio = Math.max(-1, Math.min(1, dy / (PET_SIZE / 2)));
+                        lookYTarget = vertRatio * (0.1 * PET_SIZE * cursorAmount) * attention;
+                    } else {
+                        tiltTarget = 0; lookYTarget = 0;
+                    }
+
+                    cursorOverPet = Math.abs(dx) <= PET_SIZE / 2 && Math.abs(dy) <= PET_SIZE / 2;
+                }
+
+                const targetGrow = (!sleeping && cursorOverPet) ? 1.12 : 1.0;
+                const stiffness = 200, damping = 10;
+                const accel = (targetGrow - hoverGrow) * stiffness;
+                hoverGrowVel += accel * dt;
+                hoverGrowVel -= hoverGrowVel * damping * dt;
+                hoverGrow += hoverGrowVel * dt;
+                hoverGrow = Math.max(0.85, Math.min(1.25, hoverGrow));
+            }
+
+            function goToSleep() {
+                sleepTarget = 1;
+                idleRests = 0;
+                stageHint.textContent = 'asleep — click to wake it up';
+            }
+
+            function wakeUp() {
+                if (sleepTarget === 0) return;
+                sleepTarget = 0;
+                stageHint.textContent = 'move your cursor nearby, or click to pat';
+                wanderState = 'resting';
+                wanderRestTimer = 0.4;
+            }
+
+            function pat() {
+                patting = true;
+                if (sleeping) wakeUp();
+                pats++;
+                patCountEl.textContent = pats + (pats === 1 ? ' pat' : ' pats');
+                safeAnime({
+                    targets: petSquish,
+                    scaleY: [{ value: 0.78, duration: 110 }, { value: 1.05, duration: 160 }, { value: 1, duration: 140 }],
+                    scaleX: [{ value: 1.1, duration: 110 }, { value: 1, duration: 260 }],
+                    easing: 'easeOutQuad',
+                    complete: () => { patting = false; }
+                });
+                spawnHearts();
+                showBubble(pickLine(PAT_LINES), 1300);
+            }
+
+            pet.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (dragMoved) { dragMoved = false; return; }
+                pat();
+            });
+            pet.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    pat();
+                }
+            });
+            stage.addEventListener('click', () => { if (sleeping) wakeUp(); });
+
+            pet.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                isDragging = true;
+                dragMoved = false;
+                pet.classList.add('dragging');
+                if (sleeping) wakeUp();
+                const r = stageRect();
+                dragOffset = { x: e.clientX - r.left - basePos.x, y: e.clientY - r.top - basePos.y };
+                if (pet.setPointerCapture) pet.setPointerCapture(e.pointerId);
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                dragMoved = true;
+                const r = stageRect();
+                basePos = clampToStage(e.clientX - r.left - dragOffset.x, e.clientY - r.top - dragOffset.y);
+            });
+
+            window.addEventListener('pointerup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                pet.classList.remove('dragging');
+                wanderState = 'resting';
+                wanderRestTimer = 0.6 + Math.random() * 1.0;
+            });
+
+            function frame(now) {
+                if (lastTime == null) lastTime = now;
+                const dt = Math.min((now - lastTime) / 1000, 0.08); 
+                lastTime = now;
+                elapsed += dt;
+
+                sleepFade += (sleepTarget - sleepFade) * Math.min(1, dt);
+                sleeping = sleepFade > 0.5;
+
+                tickWander(dt);
+                tickCursor(dt);
+
+                const smooth = Math.min(1, 6 * dt);
+                facingDisplay += (facing - facingDisplay) * smooth;
+                tiltAngle += (tiltTarget - tiltAngle) * smooth;
+                lookY += (lookYTarget - lookY) * smooth;
+
+                let rockAngle = 0;
+                if (sleepFade > 0.01) {
+                    sleepRockPhase += dt * 1.5;
+                    rockAngle = Math.sin(sleepRockPhase) * 7 * sleepFade;
+                }
+
+                const opacityFactor = 1 - sleepFade * 0.35;
+                const brightness = 1 - sleepFade * 0.35;
+                const squishY = 1 - sleepFade * 0.05;
+
+                const bobSlowdown = 1 - sleepFade * 0.7;
+                const bobA1 = (1.0 + bobAmount * 3.0) * bobSlowdown;
+                const bobA2 = bobA1 * 0.4;
+                const bobA3 = bobA1 * 0.2;
+                const bobY = bobA1 * Math.sin(bobF1 * elapsed + bobPhase1) +
+                    bobA2 * Math.sin(bobF2 * elapsed + bobPhase2) +
+                    bobA3 * Math.sin(bobF3 * elapsed + bobPhase3);
+                const bobX = Math.sin(elapsed * 0.5 + bobPhase1) * bobA1 * 0.3;
+
+                pet.style.left = basePos.x + 'px';
+                pet.style.top = basePos.y + 'px';
+                pet.style.opacity = opacityFactor.toFixed(3);
+                petSquish.style.filter = 'drop-shadow(0 6px 14px rgba(0,0,0,0.4)) brightness(' + brightness.toFixed(3) + ')';
+                zzz.style.opacity = sleepFade.toFixed(3);
+                zzz.style.transform = 'translateY(' + (4 - sleepFade * 10).toFixed(2) + 'px)';
+                petInner.style.transform =
+                    'translate(' + bobX.toFixed(2) + 'px, ' + bobY.toFixed(2) + 'px) ' +
+                    'scaleX(' + (facingDisplay * hoverGrow).toFixed(3) + ') ' +
+                    'scaleY(' + (hoverGrow * squishY).toFixed(3) + ') ' +
+                    'rotate(' + (tiltAngle + rockAngle).toFixed(2) + 'deg) ' +
+                    'translateY(' + lookY.toFixed(2) + 'px)';
+
+                requestAnimationFrame(frame);
+            }
+
+            basePos = clampToStage(stage.clientWidth * 0.5 - PET_SIZE / 2, stage.clientHeight * 0.5 - PET_SIZE / 2);
+            requestAnimationFrame(frame);
+        })();
+
+        (function () {
+            if (!hasAnime) return;
+
+            const btns = ['#btnPause', '#btnArrange', '#btnHide'].map(s => document.querySelector(s));
+            let bi = 0;
+            setInterval(() => {
+                btns.forEach(b => b.classList.remove('pulse'));
+                btns[bi % btns.length].classList.add('pulse');
+                bi++;
+            }, 1800);
+
+            const rows = ['#petItemCat', '#petItemDog', '#petItemAnime'].map(s => document.querySelector(s));
+            let ri = 0;
+            setInterval(() => {
+                rows.forEach(r => r.classList.remove('active'));
+                rows[ri % rows.length].classList.add('active');
+                ri++;
+            }, 3600);
+
+            function breathe(sliderSel, spinSel, base, amp, suffix, decimals) {
+                const slider = document.querySelector(sliderSel);
+                const spin = document.querySelector(spinSel);
+                if (!slider) return;
+                const fill = slider.querySelector('.fill');
+                const handle = slider.querySelector('.handle');
+                anime({
+                    targets: { v: base },
+                    v: base + amp,
+                    duration: 2600,
+                    direction: 'alternate',
+                    loop: true,
+                    easing: 'easeInOutSine',
+                    update: (anim) => {
+                        const v = anim.animations[0].currentValue;
+                        const pct = Math.max(0, Math.min(100, parseFloat(v)));
+                        fill.style.width = pct + '%';
+                        handle.style.left = pct + '%';
+                        if (spin) spin.textContent = (pct / 100 * (decimals ? 2 : 1)).toFixed(decimals || 0) + (suffix || '');
+                    }
+                });
+            }
+            breathe('#sliderScale', '#spinScale', 32, 10, 'x', 2);
+            breathe('#sliderOpacity', '#spinOpacity', 86, 12, '%', 0);
+            breathe('#sliderFps', '#spinFps', 18, 14, '', 0);
+
+            const rotSlider = document.querySelector('#sliderRotation');
+            const rotVal = document.querySelector('#rotationVal');
+            if (rotSlider) {
+                const fill = rotSlider.querySelector('.fill');
+                const handle = rotSlider.querySelector('.handle');
+                anime({
+                    targets: { v: 15 },
+                    v: 85,
+                    duration: 3400,
+                    direction: 'alternate',
+                    loop: true,
+                    easing: 'easeInOutSine',
+                    update: (anim) => {
+                        const pct = anim.animations[0].currentValue;
+                        fill.style.width = pct + '%';
+                        handle.style.left = pct + '%';
+                        rotVal.textContent = Math.round(pct / 100 * 360) + '°';
+                    }
+                });
+            }
+
+            const snapBtns = document.querySelectorAll('#snapGrid .snap-btn');
+            if (snapBtns.length) {
+                let si = 0;
+                setInterval(() => {
+                    snapBtns.forEach(b => b.classList.remove('hit'));
+                    const btn = snapBtns[si % snapBtns.length];
+                    btn.classList.add('hit');
+                    si++;
+                }, 1000);
+            }
+        })();
+
+        (function () {
+            const peek = document.getElementById('downloadPeek');
+            if (!peek) return;
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        safeAnime({
+                            targets: peek,
+                            opacity: [0, 1],
+                            translateY: [30, 0],
+                            rotate: [15, -6],
+                            duration: 700,
+                            easing: 'easeOutBack'
+                        });
+                        if (hasAnime && !reducedMotion) {
+                            anime({ targets: peek, translateY: [-6, 0, -6], rotate: -6, duration: 2600, easing: 'easeInOutSine', loop: true, delay: 700 });
+                        }
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.4 });
+            io.observe(peek);
+        })();
+    </script>
+</body>
+</html>
