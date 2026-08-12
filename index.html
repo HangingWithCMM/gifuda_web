@@ -65,7 +65,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            *:not(.pet):not(.petal):not(.stick), *:not(.pet):not(.petal):not(.stick)::before, *:not(.pet):not(.petal):not(.stick)::after {
+            *:not(.pet):not(.petal), *:not(.pet):not(.petal)::before, *:not(.pet):not(.petal)::after {
                 animation-duration: 0.001ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.001ms !important;
@@ -334,55 +334,6 @@
             flex-wrap: wrap;
             justify-content: center;
             opacity: 0;
-        }
-
-        .scroll-cue {
-            position: absolute;
-            bottom: 28px;
-            left: 0;
-            right: 0;
-            width: fit-content;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            color: var(--text-muted);
-            font-size: 11px;
-            font-family: var(--font-mono);
-            letter-spacing: 1px;
-            opacity: 0;
-            transform: translateZ(0);
-            will-change: transform;
-        }
-
-        .scroll-cue .scroll-label {
-            margin-right: -1px;
-        }
-
-        .scroll-cue .stick {
-            width: 18px; height: 28px;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .scroll-cue .stick::before {
-            content: '';
-            position: absolute;
-            top: 5px; left: 50%;
-            transform: translateX(-50%);
-            width: 3px; height: 6px;
-            border-radius: 2px;
-            background: var(--sakura);
-            animation: scroll-dot 1.6s ease-in-out infinite;
-        }
-
-        @keyframes scroll-dot {
-            0% { top: 5px; opacity: 1; }
-            60% { top: 15px; opacity: 0.3; }
-            61% { top: 5px; opacity: 0; }
-            100% { top: 5px; opacity: 1; }
         }
 
         .btn {
@@ -1176,7 +1127,6 @@
             <a href="#stage" class="btn btn-ghost">Watch it move</a>
         </div>
 
-        <div class="scroll-cue" id="scrollCue"><div class="stick"></div><span class="scroll-label">SCROLL</span></div>
     </div>
 
     <section id="stage">
@@ -1412,7 +1362,7 @@
         })();
 
         window.addEventListener('DOMContentLoaded', () => {
-            const els = ['#heroEyebrow', '#heroTitle', '#heroJp', '#heroPitch', '#heroTagline', '#heroButtons', '#scrollCue']
+            const els = ['#heroEyebrow', '#heroTitle', '#heroJp', '#heroPitch', '#heroTagline', '#heroButtons']
                 .map(sel => document.querySelector(sel));
 
             safeAnime({
