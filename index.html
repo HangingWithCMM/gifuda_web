@@ -516,7 +516,7 @@
 
         .demo-pet {
             position: absolute;
-            width: 185px; height: 185px;
+            width: 215px; height: 215px;
             left: 0; top: 0;
             cursor: grab;
             user-select: none;
@@ -554,10 +554,10 @@
             background: var(--cream);
             color: var(--bg-deepest);
             font-family: var(--font-mono);
-            font-size: 11px;
+            font-size: 16px;
             font-weight: 500;
-            padding: 6px 10px;
-            border-radius: 8px;
+            padding: 10px 16px;
+            border-radius: 12px;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
@@ -568,7 +568,7 @@
             position: absolute;
             top: 100%; left: 50%;
             transform: translateX(-50%);
-            border: 5px solid transparent;
+            border: 7px solid transparent;
             border-top-color: var(--cream);
         }
 
@@ -1334,7 +1334,10 @@
             if (hasAnime) return anime(opts);
             if (opts.targets) {
                 const els = (opts.targets instanceof NodeList || Array.isArray(opts.targets)) ? opts.targets : [opts.targets];
-                els.forEach(el => { if (el) el.style.opacity = 1; });
+                let finalOpacity = 1;
+                if (Array.isArray(opts.opacity)) finalOpacity = opts.opacity[opts.opacity.length - 1];
+                else if (typeof opts.opacity === 'number') finalOpacity = opts.opacity;
+                els.forEach(el => { if (el) el.style.opacity = finalOpacity; });
             }
             if (opts.complete) opts.complete();
         }
@@ -1452,7 +1455,7 @@
 
             const PAT_LINES = [ 'hehe~', 'that feels nice', 'aww', 'mrrp, thank you', ':3', 'again? okay!', "you're sweet",];
             const NOTICE_LINES = [ 'oh, hi!', 'hi there', 'watcha doing?', 'you noticed me?', 'hehe, hi', '...watching you', ];
-            const PET_SIZE = 190;
+            const PET_SIZE = 225;
 
             let lastLineShown = null;
             function pickLine(lines) {
