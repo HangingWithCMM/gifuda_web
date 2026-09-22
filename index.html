@@ -1584,7 +1584,19 @@
                     { x: .36, size: 20, rise: 82, drift: 32, delay: 310, color: '#ff719c' },
                     { x: -.12, size: 23, rise: 128, drift: -12, delay: 390, color: '#ffacc6' }
                 ];
-                layout.slice(0, count).forEach((item, index) => {
+                layout.slice(0, count).forEach((preset, index) => {
+                    const jitter = amount => (Math.random() * 2 - 1) * amount;
+                    const item = {
+                        ...preset,
+                        x: preset.x + jitter(.045),
+                        size: preset.size * (1 + jitter(.12)),
+                        rise: preset.rise * (1 + jitter(.16)),
+                        drift: preset.drift * (1 + jitter(.25)),
+                        delay: Math.max(0, preset.delay + jitter(55))
+                    };
+                    const phase = index * .7 + jitter(.8);
+                    const swayAmount = 15 + jitter(4);
+                    const duration = 1750 + index * 70 + jitter(180);
                     const heart = document.createElement('div');
                     heart.className = 'heart-particle';
                     heart.setAttribute('aria-hidden', 'true');
@@ -1599,7 +1611,7 @@
                     const clampX = x => Math.max(margin, Math.min(stage.clientWidth - margin, x));
                     const clampY = y => Math.max(margin, Math.min(stage.clientHeight - margin, y));
                     const startX = clampX(cx + petRect.width * item.x);
-                    const startY = clampY(cy + (index % 2) * 10);
+                    const startY = clampY(cy + (index % 2) * 10 + jitter(7));
                     heart.style.left = startX - item.size / 2 + 'px';
                     heart.style.top = startY - item.size / 2 + 'px';
                     stage.appendChild(heart);
@@ -1608,11 +1620,11 @@
                         const launch = Math.min(1, t / .18);
                         const pop = 1 - Math.pow(1 - launch, 3) + Math.sin(launch * Math.PI) * .16;
                         const fade = Math.max(0, Math.min(1, (t - .58) / .42));
-                        const sway = Math.sin(t * Math.PI * 2.5 + index * .7) * 15 * Math.sin(t * Math.PI);
+                        const sway = Math.sin(t * Math.PI * 2.5 + phase) * swayAmount * Math.sin(t * Math.PI);
                         const travel = 1 - Math.pow(1 - t, 1.5);
                         const x = clampX(startX + item.drift * 1.5 * travel + sway) - startX;
                         const y = clampY(startY - item.rise * travel) - startY;
-                        const turn = item.drift * .3 + Math.sin(t * Math.PI * 3 + index * .7) * 16;
+                        const turn = item.drift * .3 + Math.sin(t * Math.PI * 3 + phase) * 16;
                         const scale = (.35 + .65 * pop) * (1 - .18 * fade);
                         return {
                             offset: t,
@@ -1621,7 +1633,7 @@
                         };
                     });
                     const animation = heart.animate(frames, {
-                        duration: 1750 + index * 70,
+                        duration,
                         delay: item.delay,
                         easing: 'linear', fill: 'both'
                     });
